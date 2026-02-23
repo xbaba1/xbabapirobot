@@ -6,7 +6,7 @@ const path = require('path');
 // --- RENDER PORT VE 7/24 AYARI (DÜZELTİLDİ) ---
 const express = require('express'); 
 const app = express();
-const port = process.env.PORT || 10000; // Render genellikle 10000 portunu kullanır
+const port = process.env.PORT || 10000; 
 
 app.get('/', (req, res) => res.send('Bot 7/24 Aktif! Port: ' + port));
 app.listen(port, '0.0.0.0', () => {
@@ -47,7 +47,7 @@ function createBot() {
         host: SUNUCU_IP, 
         username: 'xbabapirobot', 
         auth: 'offline',
-        version: '1.20.1' // Sunucu sürümünü buraya sabitledim
+        version: '1.20.1' 
     });
     bot.loadPlugin(pathfinder);
 
@@ -135,9 +135,17 @@ function createBot() {
         }
     });
 
+    // --- FİLTREYİ AŞMAK İÇİN GÜNCELLENEN KISIM ---
     bot.once('spawn', () => {
         console.log('Bot başarıyla doğdu!');
-        setTimeout(() => bot.chat('/login 918273645'), 3000);
+        // Hem login yap hem de 1 saniye sonra küçük bir hareket yap ki filtre atmasın
+        setTimeout(() => {
+            bot.chat('/login 918273645');
+            setTimeout(() => {
+                bot.setControlState('jump', true);
+                setTimeout(() => bot.setControlState('jump', false), 400);
+            }, 1000);
+        }, 1500); // 1.5 saniye sonra login (süreyi aştınız hatasını önlemek için)
     });
 
     bot.on('error', (err) => console.log('Bot Hatası: ', err));
