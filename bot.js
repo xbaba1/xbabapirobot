@@ -2,6 +2,9 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
 const fs = require('fs');
 const path = require('path');
+const app = express();
+app.get('/', (req, res) => res.send('Bot 7/24 Aktif!'));
+app.listen(process.env.PORT || 3000);
 
 // --- AYARLAR ---
 const SUNUCU_IP = 'newfag.xyz'; 
