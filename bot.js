@@ -2,6 +2,9 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
 const fs = require('fs');
 const path = require('path');
+
+// --- RENDER 7/24 AYARI (SİLME) ---
+const express = require('express'); // Express'i buraya düzgünce tanımladık
 const app = express();
 app.get('/', (req, res) => res.send('Bot 7/24 Aktif!'));
 app.listen(process.env.PORT || 3000);
@@ -134,7 +137,17 @@ function createBot() {
         }
     });
 
-    bot.once('spawn', () => setTimeout(() => bot.chat('/login 918273645'), 3000));
-    bot.on('end', () => setTimeout(createBot, 5000));
+    bot.once('spawn', () => {
+        console.log('Bot başarıyla doğdu!');
+        setTimeout(() => bot.chat('/login 918273645'), 3000);
+    });
+
+    // --- TAKİP KODLARI (HATAYI GÖRMEK İÇİN) ---
+    bot.on('error', (err) => console.log('Bot Hatası: ', err));
+    bot.on('kicked', (reason) => console.log('Bot Sunucudan Atıldı: ', reason));
+    bot.on('end', () => {
+        console.log('Bağlantı kesildi, 5 saniye sonra tekrar denenecek...');
+        setTimeout(createBot, 5000);
+    });
 }
 createBot();
