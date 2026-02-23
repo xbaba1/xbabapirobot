@@ -45,7 +45,7 @@ function listeyiKaydet(liste) {
 function createBot() {
     bot = mineflayer.createBot({ 
         host: SUNUCU_IP, 
-        username: 'xbabapirobot', 
+        username: 'xbabapiro', 
         auth: 'offline',
         version: '1.20.1' 
     });
