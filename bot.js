@@ -3,7 +3,7 @@ const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
 const fs = require('fs');
 const path = require('path');
 
-// --- RENDER PORT VE 7/24 AYARI (DÜZELTİLDİ) ---
+// --- RENDER PORT VE 7/24 AYARI ---
 const express = require('express'); 
 const app = express();
 const port = process.env.PORT || 10000; 
@@ -14,19 +14,16 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 // --- AYARLAR ---
-const SUNUCU_IP = 'newfag.xyz'; 
+const SUNUCU_IP = 'mc.quiltanarchy.xyz'; // Yeni sunucu IP adresi yapıldı
 const admin = 'xbabapiro'; 
 const PREFIX = '%'; 
 
 // VERDİĞİN ASIL BİRİM FİYATLARI
 const BİRİM_KUR = { dolar: 43.50, euro: 51.79, altin: 6778.73, btc: 94230 };
 
-let kitBakimda = false;
 let bot;
 let mevlanaInterval = null;
 let afkSebep = null;
-
-const SEHIRLER = ["adana", "adiyaman", "afyonkarahisar", "agri", "amasya", "ankara", "antalya", "artvin", "aydin", "balikesir", "bilecik", "bingol", "bitlis", "bolu", "burdur", "bursa", "canakkale", "cankiri", "corum", "denizli", "diyarbakir", "edirne", "elazig", "erzincan", "erzurum", "eskisehir", "gaziantep", "giresun", "gumushane", "hakkari", "hatay", "isparta", "mersin", "istanbul", "izmir", "kars", "kastamonu", "kayseri", "kirklareli", "kirsehir", "kocaeli", "konya", "kutahya", "malatya", "manisa", "kahramanmaras", "mardin", "mugla", "mus", "nevsehir", "nigde", "ordu", "rize", "sakarya", "samsun", "siirt", "sinop", "sivas", "tekirdag", "tokat", "trabzon", "tunceli", "sanliurfa", "usak", "van", "yozgat", "zonguldak", "aksaray", "bayburt", "karaman", "kirikkale", "batman", "sirnak", "bartin", "ardahan", "igdir", "yalova", "karabuk", "kilis", "osmaniye", "duzce"];
 
 function listeyiOku() {
     try {
@@ -45,7 +42,7 @@ function listeyiKaydet(liste) {
 function createBot() {
     bot = mineflayer.createBot({ 
         host: SUNUCU_IP, 
-        username: 'xbabapiro', 
+        username: 'xbabapirobot', // Botun adı tekrar ayarlandı
         auth: 'offline',
         version: '1.20.1' 
     });
@@ -135,17 +132,12 @@ function createBot() {
         }
     });
 
-    // --- FİLTREYİ AŞMAK İÇİN GÜNCELLENEN KISIM ---
     bot.once('spawn', () => {
         console.log('Bot başarıyla doğdu!');
-        // Hem login yap hem de 1 saniye sonra küçük bir hareket yap ki filtre atmasın
+        // Girdiği an login yapması için süre ayarlandı
         setTimeout(() => {
             bot.chat('/login 918273645');
-            setTimeout(() => {
-                bot.setControlState('jump', true);
-                setTimeout(() => bot.setControlState('jump', false), 400);
-            }, 1000);
-        }, 1500); // 1.5 saniye sonra login (süreyi aştınız hatasını önlemek için)
+        }, 1500); 
     });
 
     bot.on('error', (err) => console.log('Bot Hatası: ', err));
