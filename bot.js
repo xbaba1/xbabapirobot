@@ -132,7 +132,11 @@ function createBot() {
             case 'gel': 
                 if(isV) { 
                     const p=bot.players[username]?.entity; 
-                    if(p) bot.pathfinder.setGoal(new goals.GoalFollow(p,1)); 
+                    if(p) {
+                        const defaultMove = new Movements(bot);
+                        bot.pathfinder.setMovements(defaultMove);
+                        bot.pathfinder.setGoal(new goals.GoalFollow(p,1)); 
+                    }
                     bot.chat(`👣 Geliyorum.`); 
                 } break;
             case 'zıpla': bot.setControlState('jump', true); setTimeout(()=>bot.setControlState('jump', false), 500); break;
@@ -147,17 +151,24 @@ function createBot() {
 
     bot.once('spawn', () => {
         console.log('Bot bağlandı: ' + SUNUCU_IP);
+        
+        // Pathfinder ayarları (Hareket etmesi için şart)
+        const defaultMove = new Movements(bot);
+        bot.pathfinder.setMovements(defaultMove);
+
         setTimeout(() => bot.chat('/login 918273645'), 3000);
 
         if (duyuruInterval) clearInterval(duyuruInterval);
         duyuruInterval = setInterval(() => {
             bot.chat('Ben 7/24 botum');
-        }, 10000); 
+        }, 60000); // 10 saniye spam riski yaratabilir, 60 saniyeye çektim.
     });
 
     bot.on('end', () => {
         if (duyuruInterval) clearInterval(duyuruInterval);
         setTimeout(createBot, 5000);
     });
+
+    bot.on('error', (err) => console.log('Hata:', err));
 }
 createBot();
