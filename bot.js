@@ -1,6 +1,6 @@
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
-const proxy = require('mineflayer-proxy'); // Proxy kütüphanesi eklendi
+const proxy = require('mineflayer-proxy'); 
 const fs = require('fs');
 const path = require('path');
 
@@ -49,16 +49,23 @@ function createBot() {
         auth: 'offline' 
     });
 
-    // --- PROXY AYARI BAŞLANGIÇ ---
+    // --- PROXY AYARI ---
     bot.loadPlugin(proxy);
     bot.proxy.connect({
         protocol: 'socks5',
-        host: '78.180.29.147', // Senin verdiğin IP
-        port: 1080              // Modemden açman gereken port
+        host: '78.180.29.147',
+        port: 1080             
     });
-    // --- PROXY AYARI BİTİŞ ---
 
     bot.loadPlugin(pathfinder);
+
+    // --- MAP CAPTCHA (HARİTA GEÇME) AYARI ---
+    bot.on('mapUpdate', (id, data) => {
+        // Sunucu harita gönderdiğinde tetiklenir
+        console.log(`Harita Güncellendi! ID: ${id}`);
+        // Eğer bot elinde bir harita tutuyorsa admin'e haber ver
+        bot.chat(`/msg ${admin} 🗺️ Harita doğrulaması ekranı geldi! Lütfen haritadaki kodu sohbete yaz.`);
+    });
 
     bot.on('chat', async (username, message) => {
         if (username === bot.username) return;
@@ -152,7 +159,7 @@ function createBot() {
     });
 
     bot.once('spawn', () => setTimeout(() => bot.chat('/login 918273645'), 3000));
-    bot.on('error', (err) => console.log('Bot hatası: ', err)); // Hataları konsola yazdır
+    bot.on('error', (err) => console.log('Bot hatası: ', err)); 
     bot.on('end', () => setTimeout(createBot, 5000));
 }
 createBot();
