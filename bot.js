@@ -25,8 +25,6 @@ let mevlanaInterval = null;
 let afkSebep = null;
 let duyuruInterval = null;
 
-const SEHIRLER = ["adana", "ankara", "istanbul", "izmir", "antalya", "bursa", "eskisehir", "konya", "samsun", "trabzon", "agri"];
-
 function listeyiOku() {
     try {
         const p = path.join(__dirname, 'v-list.txt');
@@ -48,34 +46,44 @@ function createBot() {
         auth: 'offline',
         version: '1.20.1'
     });
+
     bot.loadPlugin(pathfinder);
 
-    bot.on('chat', async (username, message) => {
+    bot.on('messagestr', (message) => {
+        // Chat formatını çöz: Tagları ve sembolleri ayıkla
+        // Örn: "[VIP] xbabapiro: %yardım" veya "<[Oyuncu] xbabapiro> %yardım"
+        const chatRegex = /(?:\[.*?\]\s*)?(\w+)\s*[:>]\s*(.*)/;
+        const match = message.match(chatRegex);
+        
+        if (!match) return;
+
+        const username = match[1]; // Saf kullanıcı adı
+        const msg = match[2].trim(); // Gönderilen mesaj
+
         if (username === bot.username) return;
         
-        if (afkSebep && message.toLowerCase().includes(admin.toLowerCase())) {
+        if (afkSebep && msg.toLowerCase().includes(admin.toLowerCase())) {
             bot.chat(`⚠️ [BİLGİ] ${admin} şu an AFK. Sebep: ${afkSebep}`);
         }
 
-        if (!message.startsWith(PREFIX)) return;
+        if (!msg.startsWith(PREFIX)) return;
 
-        const args = message.slice(PREFIX.length).trim().split(/ +/g);
+        const args = msg.slice(PREFIX.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
         const miktar = parseFloat(args[0]) || 1;
         const hedef = args[0] ? args[0].toLowerCase() : username.toLowerCase();
         
         let vList = listeyiOku();
+        // Yetki kontrolü (Tag olsa bile sadece isme bakar)
         const isAdmin = (username.toLowerCase() === admin.toLowerCase());
         const isV = vList.includes(username.toLowerCase()) || isAdmin;
 
         switch (command) {
-            // --- EKONOMİ ---
             case 'dolar': bot.chat(`💵 ${miktar} Dolar = ${(miktar * BİRİM_KUR.dolar).toFixed(2)} TL.`); break;
             case 'euro': bot.chat(`💶 ${miktar} Euro = ${(miktar * BİRİM_KUR.euro).toFixed(2)} TL.`); break;
             case 'altın': bot.chat(`🪙 ${miktar} Altın = ${(miktar * BİRİM_KUR.altin).toFixed(2)} TL.`); break;
             case 'btc': bot.chat(`₿ ${miktar} BTC = ${(miktar * BİRİM_KUR.btc).toLocaleString()} $`); break;
 
-            // --- YARDIM ---
             case 'yardım':
                 bot.chat("🛠 1/4: %ping, %eniyiping, %enkötüping, %dolar, %euro, %altın, %btc");
                 setTimeout(() => bot.chat("🛠 2/4: %pp, %afk, %zıpla, %dur, %yazı-tura, %zar, %şans"), 1500);
@@ -88,23 +96,13 @@ function createBot() {
                 bot.chat(`/msg ${username} 💎 V: %v, %v-k, %v-list, %mevlana, %dur, %tp, %gel, %izle, %koru, %dans`);
                 break;
 
-            // --- BİLGİ & EĞLENCE ---
             case 'ping': bot.chat(`📡 ${hedef} ping: ${bot.players[hedef]?.ping || "0"}ms`); break;
             case 'eniyiping': 
                 let eni={n:'',p:9999}; 
                 Object.values(bot.players).forEach(p=>{if(p.ping>0 && p.ping<eni.p)eni={n:p.username,p:p.ping}}); 
                 bot.chat(`🚀 En iyi: ${eni.n} (${eni.p}ms)`); 
                 break;
-            case 'enkötüping': 
-                let enk={n:'',p:-1}; 
-                Object.values(bot.players).forEach(p=>{if(p.ping>enk.p)enk={n:p.username,p:p.ping}}); 
-                bot.chat(`🐢 En kötü: ${enk.n} (${enk.p}ms)`); 
-                break;
             case 'pp': bot.chat(`${hedef} pp: 8${"=".repeat(Math.floor(Math.random()*15)+1)}D`); break;
-            case 'hava': 
-                let s = args[0] ? args[0].toLowerCase() : "agri";
-                bot.chat(`☁️ ${s.toUpperCase()} için hava: Güneşli 24°C`);
-                break;
             case 'yazı-tura': bot.chat(`🪙 Sonuç: ${Math.random()>0.5 ? "YAZI" : "TURA"}`); break;
             case 'zar': bot.chat(`🎲 Zar: ${Math.floor(Math.random()*6)+1}`); break;
             case 'şans': bot.chat(`🍀 %${Math.floor(Math.random()*100)} şanslısın.`); break;
@@ -113,32 +111,35 @@ function createBot() {
             case 'espri': bot.chat("Adamın biri gülmüş, saksıya koymuşlar."); break;
             case 'aktif': bot.chat(`👥 Aktif: ${Object.keys(bot.players).length}`); break;
 
-            // --- V-LIST VE YETKİLER ---
             case 'v': if(isAdmin) { vList.push(hedef); listeyiKaydet(vList); bot.chat(`✅ ${hedef} eklendi.`); } break;
             case 'v-k': if(isAdmin) { const yeni = vList.filter(n => n !== hedef); listeyiKaydet(yeni); bot.chat(`🗑️ ${hedef} silindi.`); } break;
             case 'v-list': bot.chat(`💎 V Listesi: ${listeyiOku().join(', ')}`); break;
+            
             case 'mevlana': 
                 if(isV) { 
                     if(mevlanaInterval) clearInterval(mevlanaInterval); 
                     mevlanaInterval=setInterval(()=>bot.look(bot.entity.yaw+0.8,0,true),40); 
                     bot.chat(`🌀 Mevlana aktif.`); 
                 } break;
+
             case 'dur': 
                 bot.clearControlStates(); 
                 bot.pathfinder.setGoal(null); 
                 if(mevlanaInterval) clearInterval(mevlanaInterval); 
                 bot.chat(`🛑 Durduruldu.`); 
                 break;
+
             case 'gel': 
                 if(isV) { 
                     const p=bot.players[username]?.entity; 
                     if(p) {
-                        const defaultMove = new Movements(bot);
-                        bot.pathfinder.setMovements(defaultMove);
-                        bot.pathfinder.setGoal(new goals.GoalFollow(p,1)); 
+                        const m = new Movements(bot);
+                        bot.pathfinder.setMovements(m);
+                        bot.pathfinder.setGoal(new goals.GoalFollow(p, 1)); 
                     }
                     bot.chat(`👣 Geliyorum.`); 
                 } break;
+
             case 'zıpla': bot.setControlState('jump', true); setTimeout(()=>bot.setControlState('jump', false), 500); break;
             case 'dans': if(isV) { bot.setControlState('jump',true); setTimeout(()=>bot.setControlState('jump',false),2000); } break;
             case 'afk': 
@@ -150,25 +151,20 @@ function createBot() {
     });
 
     bot.once('spawn', () => {
-        console.log('Bot bağlandı: ' + SUNUCU_IP);
-        
-        // Pathfinder ayarları (Hareket etmesi için şart)
-        const defaultMove = new Movements(bot);
-        bot.pathfinder.setMovements(defaultMove);
-
+        console.log('Bot aktif ve tagları algılayabilir!');
+        const m = new Movements(bot);
+        bot.pathfinder.setMovements(m);
         setTimeout(() => bot.chat('/login 918273645'), 3000);
 
         if (duyuruInterval) clearInterval(duyuruInterval);
         duyuruInterval = setInterval(() => {
             bot.chat('Ben 7/24 botum');
-        }, 60000); // 10 saniye spam riski yaratabilir, 60 saniyeye çektim.
+        }, 60000);
     });
 
     bot.on('end', () => {
         if (duyuruInterval) clearInterval(duyuruInterval);
         setTimeout(createBot, 5000);
     });
-
-    bot.on('error', (err) => console.log('Hata:', err));
 }
 createBot();
