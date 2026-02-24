@@ -14,7 +14,7 @@ app.listen(port, '0.0.0.0', () => {
 });
 
 // --- AYARLAR ---
-const SUNUCU_IP = 'newfag.xyz'; 
+const SUNUCU_IP = 'mdbam.aternos.me'; 
 const admin = 'xbabapiro'; 
 const PREFIX = '%'; 
 
