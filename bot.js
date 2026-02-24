@@ -1,6 +1,5 @@
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
-const proxy = require('mineflayer-proxy'); 
 const fs = require('fs');
 const path = require('path');
 
@@ -21,12 +20,9 @@ const PREFIX = '%';
 
 const BİRİM_KUR = { dolar: 43.50, euro: 51.79, altin: 6778.73, btc: 94230 };
 
-let kitBakimda = false;
 let bot;
 let mevlanaInterval = null;
 let afkSebep = null;
-
-const SEHIRLER = ["adana", "adiyaman", "afyonkarahisar", "agri", "amasya", "ankara", "antalya", "artvin", "aydin", "balikesir", "bilecik", "bingol", "bitlis", "bolu", "burdur", "bursa", "canakkale", "cankiri", "corum", "denizli", "diyarbakir", "edirne", "elazig", "erzincan", "erzurum", "eskisehir", "gaziantep", "giresun", "gumushane", "hakkari", "hatay", "isparta", "mersin", "istanbul", "izmir", "kars", "kastamonu", "kayseri", "kirklareli", "kirsehir", "kocaeli", "konya", "kutahya", "malatya", "manisa", "kahramanmaras", "mardin", "mugla", "mus", "nevsehir", "nigde", "ordu", "rize", "sakarya", "samsun", "siirt", "sinop", "sivas", "tekirdag", "tokat", "trabzon", "tunceli", "sanliurfa", "usak", "van", "yozgat", "zonguldak", "aksaray", "bayburt", "karaman", "kirikkale", "batman", "sirnak", "bartin", "ardahan", "igdir", "yalova", "karabuk", "kilis", "osmaniye", "duzce"];
 
 function listeyiOku() {
     try {
@@ -49,23 +45,7 @@ function createBot() {
         auth: 'offline' 
     });
 
-    // --- PROXY AYARI ---
-    bot.loadPlugin(proxy);
-    bot.proxy.connect({
-        protocol: 'socks5',
-        host: '78.180.29.147',
-        port: 1080             
-    });
-
     bot.loadPlugin(pathfinder);
-
-    // --- MAP CAPTCHA (HARİTA GEÇME) AYARI ---
-    bot.on('mapUpdate', (id, data) => {
-        // Sunucu harita gönderdiğinde tetiklenir
-        console.log(`Harita Güncellendi! ID: ${id}`);
-        // Eğer bot elinde bir harita tutuyorsa admin'e haber ver
-        bot.chat(`/msg ${admin} 🗺️ Harita doğrulaması ekranı geldi! Lütfen haritadaki kodu sohbete yaz.`);
-    });
 
     bot.on('chat', async (username, message) => {
         if (username === bot.username) return;
@@ -138,10 +118,6 @@ function createBot() {
             case 'yazı-tura': bot.chat(`🪙 Sonuç: ${Math.random()>0.5 ? "YAZI" : "TURA"}`); break;
             case 'zar': bot.chat(`🎲 Zar: ${Math.floor(Math.random()*6)+1}`); break;
             case 'şans': bot.chat(`🍀 %${Math.floor(Math.random()*100)} şanslısın.`); break;
-            case 'hava':
-                let s = args[0] ? args[0].toLowerCase().replace(/ı/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g') : "ağri";
-                if (SEHIRLER.includes(s)) bot.chat(`🌍 [HABER] ${s.toUpperCase()}: Bulutlu, Sıcaklık: ${Math.floor(Math.random()*15)+1}°C.`);
-                break;
             case 'mevlana': if(isV) { if(mevlanaInterval) clearInterval(mevlanaInterval); mevlanaInterval=setInterval(()=>bot.look(bot.entity.yaw+0.8,0,true),40); bot.chat(`🌀 Mevlana aktif.`); } break;
             case 'gel': if(isV) { const p=bot.players[username]?.entity; if(p) bot.pathfinder.setGoal(new goals.GoalFollow(p,1)); bot.chat(`👣 Geliyorum.`); } break;
             case 'tp': if(isV) bot.chat(`/tp ${hedef}`); break;
